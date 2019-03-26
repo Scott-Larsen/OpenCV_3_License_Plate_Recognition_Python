@@ -18,7 +18,3 @@ class PossiblePlate:
     # end constructor
 
 # end class
-
-
-
-

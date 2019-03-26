@@ -3,6 +3,10 @@ import os
 
 import cv2
 import numpy as np
+
+from PIL import Image
+from scipy.misc import toimage
+
 import math
 import random
 
@@ -49,6 +53,11 @@ def loadKNNDataAndTrainKNN():
 
     try:
         npaClassifications = np.loadtxt("classifications.txt", np.float32)                  # read in training classifications
+
+        # if Main.scottDisplaySteps == True: # show steps #######################################################
+        #     Main.scottShowSteps("npaClassifications", npaClassifications)
+            # end if # show steps #####################################################################
+
     except:                                                                                 # if file could not be opened
         print("error, unable to open classifications.txt, exiting program\n")  # show error message
         os.system("pause")
@@ -57,6 +66,11 @@ def loadKNNDataAndTrainKNN():
 
     try:
         npaFlattenedImages = np.loadtxt("flattened_images.txt", np.float32)                 # read in training images
+
+        if Main.scottShowSteps == True: # show steps #######################################################
+            cv2.imshow("npaFlattenedImages", npaFlattenedImages)
+            cv2.waitKey(0)
+
     except:                                                                                 # if file could not be opened
         print("error, unable to open flattened_images.txt, exiting program\n")  # show error message
         os.system("pause")
@@ -101,7 +115,7 @@ def detectCharsInPlates(listOfPossiblePlates):
         thresholdValue, possiblePlate.imgThresh = cv2.threshold(possiblePlate.imgThresh, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         if Main.showSteps == True: # show steps ###################################################
-            cv2.imshow("5d", possiblePlate.imgThresh)
+            cv2.imshow("5d possiblePlate.imgThresh", possiblePlate.imgThresh)
         # end if # show steps #####################################################################
 
                 # find all possible chars in the plate,
@@ -115,11 +129,23 @@ def detectCharsInPlates(listOfPossiblePlates):
 
             for possibleChar in listOfPossibleCharsInPlate:
                 contours.append(possibleChar.contour)
+                # print(PossibleChar.PossibleChar)
+                # print(imgContours)
+                # cv2.imshow("possibleChar", licPlate.imgPlate)
+                # cv2.waitKey(0)
             # end for
 
+            # print(imgContours)
+
+            print("About to draw Contours")
+            cv2.waitKey(0)
             cv2.drawContours(imgContours, contours, -1, Main.SCALAR_WHITE)
 
-            cv2.imshow("6", imgContours)
+
+
+            print("About to imshow imgContours")
+            cv2.waitKey(0)
+            cv2.imshow("6 imgContours", imgContours)
         # end if # show steps #####################################################################
 
                 # given a list of all possible chars, find groups of matching chars within the plate
@@ -139,7 +165,7 @@ def detectCharsInPlates(listOfPossiblePlates):
                 # end for
                 cv2.drawContours(imgContours, contours, -1, (intRandomBlue, intRandomGreen, intRandomRed))
             # end for
-            cv2.imshow("7", imgContours)
+            cv2.imshow("7 imgContours", imgContours)
         # end if # show steps #####################################################################
 
         if (len(listOfListsOfMatchingCharsInPlate) == 0):			# if no groups of matching chars were found in the plate
@@ -179,7 +205,7 @@ def detectCharsInPlates(listOfPossiblePlates):
 
                 cv2.drawContours(imgContours, contours, -1, (intRandomBlue, intRandomGreen, intRandomRed))
             # end for
-            cv2.imshow("8", imgContours)
+            cv2.imshow("8 imgContours", imgContours)
         # end if # show steps #####################################################################
 
                 # within each possible plate, suppose the longest list of potential matching chars is the actual list of chars
@@ -207,7 +233,7 @@ def detectCharsInPlates(listOfPossiblePlates):
 
             cv2.drawContours(imgContours, contours, -1, Main.SCALAR_WHITE)
 
-            cv2.imshow("9", imgContours)
+            cv2.imshow("9 imgContours", imgContours)
         # end if # show steps #####################################################################
 
         possiblePlate.strChars = recognizeCharsInPlate(possiblePlate.imgThresh, longestListOfMatchingCharsInPlate)
@@ -236,7 +262,8 @@ def findPossibleCharsInPlate(imgGrayscale, imgThresh):
     imgThreshCopy = imgThresh.copy()
 
             # find all contours in plate
-    imgContours, contours, npaHierarchy = cv2.findContours(imgThreshCopy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    # imgContours, contours, npaHierarchy = cv2.findContours(imgThreshCopy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, npaHierarchy = cv2.findContours(imgThreshCopy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:                        # for each contour
         possibleChar = PossibleChar.PossibleChar(contour)
@@ -269,11 +296,19 @@ def findListOfListsOfMatchingChars(listOfPossibleChars):
             # note that chars that are not found to be in a group of matches do not need to be considered further
     listOfListsOfMatchingChars = []                  # this will be the return value
 
-    for possibleChar in listOfPossibleChars:                        # for each possible char in the one big list of chars
+    # print("\nI'm in the findListOfListsOfMatchingChars function")
+    # print(f"\nlistOfPossibleChars = {listOfPossibleChars}")
+
+    for possibleChar in listOfPossibleChars:
+
+        # print(f"\nPossible char = {possibleChar}")
+        # for each possible char in the one big list of chars
         listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
 
         listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
 
+        # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
+        #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
         if len(listOfMatchingChars) < MIN_NUMBER_OF_MATCHING_CHARS:     # if current possible list of matching chars is not long enough to constitute a possible plate
             continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
                                                 # to save the list in any way since it did not have enough chars to be a possible plate
@@ -363,7 +398,7 @@ def angleBetweenChars(firstChar, secondChar):
 # end function
 
 ###################################################################################################
-# if we have two chars overlapping or to close to each other to possibly be separate chars, remove the inner (smaller) char,
+# if we have two chars overlapping or too close to each other to possibly be separate chars, remove the inner (smaller) char,
 # this is to prevent including the same char twice if two contours are found for the same char,
 # for example for the letter 'O' both the inner ring and the outer ring may be found as contours, but we should only include the char once
 def removeInnerOverlappingChars(listOfMatchingChars):
@@ -422,7 +457,7 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
 
         npaROIResized = np.float32(npaROIResized)               # convert from 1d numpy array of ints to 1d numpy array of floats
 
-        retval, npaResults, neigh_resp, dists = kNearest.findNearest(npaROIResized, k = 1)              # finally we can call findNearest !!!
+        retval, npaResults, neigh_resp, dists = kNearest.findNearest(npaROIResized, k = 5)              # finally we can call findNearest !!!
 
         strCurrentChar = str(chr(int(npaResults[0][0])))            # get character from results
 
@@ -431,16 +466,10 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
     # end for
 
     if Main.showSteps == True: # show steps #######################################################
-        cv2.imshow("10", imgThreshColor)
+        print("About to imshow 10 imgThreshColor")
+        cv2.waitKey(0)
+        cv2.imshow("10 imgThreshColor", imgThreshColor)
     # end if # show steps #########################################################################
 
     return strChars
 # end function
-
-
-
-
-
-
-
-

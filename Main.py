@@ -15,7 +15,14 @@ SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
-showSteps = False
+MAX_NUMBER_OF_DIGITS = 3
+
+showSteps = True
+scottDisplaySteps = True
+
+def scottShowSteps(arg0, arg1):
+    cv2.imshow(arg0, arg1)
+    cv2.waitKey(0)
 
 ###################################################################################################
 def main():
@@ -23,11 +30,14 @@ def main():
     blnKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()         # attempt KNN training
 
     if blnKNNTrainingSuccessful == False:                               # if KNN training was not successful
-        print("\nerror: KNN traning was not successful\n")  # show error message
+        print("\nerror: KNN training was not successful\n")  # show error message
         return                                                          # and exit program
     # end if
 
-    imgOriginalScene  = cv2.imread("LicPlateImages/1.png")               # open image
+    # imgOriginalScene  = cv2.imread("LicPlateImages/1.png")               # open image
+    imgOriginalScene = cv2.imread("/Users/Scott/Desktop/DATA/SORT/CodingProgrammingPython/License_Plate_Recognition_Python/TestRaceImages/SRL_8136.jpg")               # open image
+
+
 
     if imgOriginalScene is None:                            # if image was not read successfully
         print("\nerror: image not read from file \n\n")  # print error message to std out
@@ -132,21 +142,3 @@ def writeLicensePlateCharsOnImage(imgOriginalScene, licPlate):
 ###################################################################################################
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
