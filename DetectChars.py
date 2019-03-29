@@ -19,7 +19,7 @@ import PossibleChar
 kNearest = cv2.ml.KNearest_create()
 
         # constants for checkIfPossibleChar, this checks one possible char only (does not compare to another char)
-MIN_PIXEL_WIDTH = 2
+MIN_PIXEL_WIDTH = 2 # default 2
 MIN_PIXEL_HEIGHT = 8
 
 MIN_ASPECT_RATIO = 0.25
@@ -29,22 +29,26 @@ MIN_PIXEL_AREA = 80
 
         # constants for comparing two chars
 MIN_DIAG_SIZE_MULTIPLE_AWAY = 0.3
-MAX_DIAG_SIZE_MULTIPLE_AWAY = 5.0
+MAX_DIAG_SIZE_MULTIPLE_AWAY = 2.0 # default was 5
 
 MAX_CHANGE_IN_AREA = 0.5
 
 MAX_CHANGE_IN_WIDTH = 0.8
-MAX_CHANGE_IN_HEIGHT = 0.2
+MAX_CHANGE_IN_HEIGHT = 0.1
 
 MAX_ANGLE_BETWEEN_CHARS = 12.0
-
-        # other constants
-MIN_NUMBER_OF_MATCHING_CHARS = 3
+#
+#         # other constants
+# MIN_NUMBER_OF_MATCHING_CHARS = 3
 
 RESIZED_CHAR_IMAGE_WIDTH = 20
 RESIZED_CHAR_IMAGE_HEIGHT = 30
 
 MIN_CONTOUR_AREA = 100
+
+MAX_NUMBER_OF_DIGITS = 3
+
+WRITE_CHAR_IMAGES = True
 
 ###################################################################################################
 def loadKNNDataAndTrainKNN():
@@ -103,9 +107,9 @@ def detectCharsInPlates(listOfPossiblePlates):
         possiblePlate.imgGrayscale, possiblePlate.imgThresh = Preprocess.preprocess(possiblePlate.imgPlate)     # preprocess to get grayscale and threshold images
 
         if Main.showSteps == True: # show steps ###################################################
-            cv2.imshow("5a", possiblePlate.imgPlate)
-            cv2.imshow("5b", possiblePlate.imgGrayscale)
-            cv2.imshow("5c", possiblePlate.imgThresh)
+            cv2.imshow("5a possiblePlate.imgPlate", possiblePlate.imgPlate)
+            cv2.imshow("5b possiblePlate.imgGrayscale", possiblePlate.imgGrayscale)
+            cv2.imshow("5c possiblePlate.imgThresh", possiblePlate.imgThresh)
         # end if # show steps #####################################################################
 
                 # increase size of plate image for easier viewing and char detection
@@ -137,19 +141,26 @@ def detectCharsInPlates(listOfPossiblePlates):
 
             # print(imgContours)
 
-            print("About to draw Contours")
+            # print("About to draw Contours")
             cv2.waitKey(0)
             cv2.drawContours(imgContours, contours, -1, Main.SCALAR_WHITE)
 
 
 
-            print("About to imshow imgContours")
-            cv2.waitKey(0)
+            # print("About to imshow imgContours")
+            # cv2.waitKey(0)
             cv2.imshow("6 imgContours", imgContours)
+            cv2.waitKey(0)
         # end if # show steps #####################################################################
 
                 # given a list of all possible chars, find groups of matching chars within the plate
         listOfListsOfMatchingCharsInPlate = findListOfListsOfMatchingChars(listOfPossibleCharsInPlate)
+
+
+
+        # print(listOfListsOfMatchingCharsInPlate)
+
+
 
         if Main.showSteps == True: # show steps ###################################################
             imgContours = np.zeros((height, width, 3), np.uint8)
@@ -296,22 +307,14 @@ def findListOfListsOfMatchingChars(listOfPossibleChars):
             # note that chars that are not found to be in a group of matches do not need to be considered further
     listOfListsOfMatchingChars = []                  # this will be the return value
 
-    # print("\nI'm in the findListOfListsOfMatchingChars function")
-    # print(f"\nlistOfPossibleChars = {listOfPossibleChars}")
-
-    for possibleChar in listOfPossibleChars:
-
-        # print(f"\nPossible char = {possibleChar}")
-        # for each possible char in the one big list of chars
+    for possibleChar in listOfPossibleChars:                        # for each possible char in the one big list of chars
         listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
 
         listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
 
-        # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
-        #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
-        if len(listOfMatchingChars) < MIN_NUMBER_OF_MATCHING_CHARS:     # if current possible list of matching chars is not long enough to constitute a possible plate
-            continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
-                                                # to save the list in any way since it did not have enough chars to be a possible plate
+        # if len(listOfMatchingChars) < MIN_NUMBER_OF_MATCHING_CHARS:     # if current possible list of matching chars is not long enough to constitute a possible plate
+        #     continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
+        #                                         # to save the list in any way since it did not have enough chars to be a possible plate
         # end if
 
                                                 # if we get here, the current list passed test as a "group" or "cluster" of matching chars
@@ -333,8 +336,105 @@ def findListOfListsOfMatchingChars(listOfPossibleChars):
 
     # end for
 
+    def listLength(elem):
+        return len(elem)
+
+    listOfListsOfMatchingChars = sorted(listOfListsOfMatchingChars, key=listLength, reverse=True)
+
+    # print(listOfListsOfMatchingChars)
+
+    positionOfBestLengthList = False
+
+    for i in range(len(listOfListsOfMatchingChars)):
+        if len(listOfListsOfMatchingChars[i]) <= MAX_NUMBER_OF_DIGITS and positionOfBestLengthList == False:
+            positionOfBestLengthList = i
+            break
+
+    # print(positionOfBestLengthList)
+
+    listOfListsOfMatchingChars = listOfListsOfMatchingChars[positionOfBestLengthList:] +\
+                                 listOfListsOfMatchingChars[:positionOfBestLengthList]
+
+    if listOfListsOfMatchingChars == False:
+        listOfListsOfMatchingChars = []
+
+    # print(listOfListsOfMatchingChars)
+
     return listOfListsOfMatchingChars
 # end function
+
+# ###################################################################################################
+# def findListOfListsOfMatchingChars(listOfPossibleChars):
+#             # with this function, we start off with all the possible chars in one big list
+#             # the purpose of this function is to re-arrange the one big list of chars into a list of lists of matching chars,
+#             # note that chars that are not found to be in a group of matches do not need to be considered further
+#     listOfListsOfMatchingChars = []                  # this will be the return value
+#
+#     # print("\nI'm in the findListOfListsOfMatchingChars function")
+#     # print(f"\nlistOfPossibleChars = {listOfPossibleChars}")
+#
+#     for possibleChar in listOfPossibleChars:
+#
+#         # print(f"\nPossible char = {possibleChar}")
+#         # for each possible char in the one big list of chars
+#         listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
+#
+#         listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
+#
+#         # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
+#         #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
+#         if len(listOfMatchingChars) <= MAX_NUMBER_OF_DIGITS:     # if current possible list of matching chars is not long enough to constitute a possible plate
+#             # continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
+#                                                 # to save the list in any way since it did not have enough chars to be a possible plate
+#
+#
+#                                                 # if we get here, the current list passed test as a "group" or "cluster" of matching chars
+#             listOfListsOfMatchingChars.append(listOfMatchingChars)      # so add to our list of lists of matching chars
+#         # end if
+#
+#
+#
+#
+#         # # print(f"\nPossible char = {possibleChar}")
+#         # # for each possible char in the one big list of chars
+#         # listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
+#         #
+#         # listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
+#         #
+#         # # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
+#         # #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
+#         # if len(listOfMatchingChars) < MIN_NUMBER_OF_MATCHING_CHARS:     # if current possible list of matching chars is not long enough to constitute a possible plate
+#         #     continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
+#         #                                         # to save the list in any way since it did not have enough chars to be a possible plate
+#         # # end if
+#         #
+#         #                                         # if we get here, the current list passed test as a "group" or "cluster" of matching chars
+#         # listOfListsOfMatchingChars.append(listOfMatchingChars)      # so add to our list of lists of matching chars
+#
+#
+#
+#
+#
+#         listOfPossibleCharsWithCurrentMatchesRemoved = []
+#
+#                                                 # remove the current list of matching chars from the big list so we don't use those same chars twice,
+#                                                 # make sure to make a new big list for this since we don't want to change the original big list
+#         listOfPossibleCharsWithCurrentMatchesRemoved = list(set(listOfPossibleChars) - set(listOfMatchingChars))
+#
+#         recursiveListOfListsOfMatchingChars = findListOfListsOfMatchingChars(listOfPossibleCharsWithCurrentMatchesRemoved)      # recursive call
+#
+#         for recursiveListOfMatchingChars in recursiveListOfListsOfMatchingChars:        # for each list of matching chars found by recursive call
+#             listOfListsOfMatchingChars.append(recursiveListOfMatchingChars)             # add to our original list of lists of matching chars
+#         # end for
+#
+#         break       # exit for
+#
+#     # end for
+#
+#
+#
+#     return listOfListsOfMatchingChars
+# # end function
 
 ###################################################################################################
 def findListOfMatchingChars(possibleChar, listOfChars):
@@ -435,6 +535,13 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
 
     height, width = imgThresh.shape
 
+
+
+    # cv2.imshow("imgThresh from recognizeCharsInPlate", imgThresh)
+    # cv2.waitKey(0)
+
+
+
     imgThreshColor = np.zeros((height, width, 3), np.uint8)
 
     listOfMatchingChars.sort(key = lambda matchingChar: matchingChar.intCenterX)        # sort chars from left to right
@@ -445,11 +552,36 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
         pt1 = (currentChar.intBoundingRectX, currentChar.intBoundingRectY)
         pt2 = ((currentChar.intBoundingRectX + currentChar.intBoundingRectWidth), (currentChar.intBoundingRectY + currentChar.intBoundingRectHeight))
 
+        # # Write out detected char images for machine learning training
+        # if WRITE_CHAR_IMAGES == True:
+        #     # cropped = image[70:170, 440:540]
+        #     print(pt1, pt2)
+        #     print(pt1[0], pt1[1], pt2[0], pt2[1])
+        #     # print(pt1[0]:pt1[1], pt2[0]:pt2[1])
+        #     # cropped = imgThreshColor[pt1[0]:pt1[1], pt2[0]:pt2[1]]
+        #     cropped = imgOriginalScene[32:21, 77:69]
+        #     cv2.imshow("cropped", cropped)
+        #     cv2.waitKey(0)
+
         cv2.rectangle(imgThreshColor, pt1, pt2, Main.SCALAR_GREEN, 2)           # draw green box around the char
 
                 # crop char out of threshold image
         imgROI = imgThresh[currentChar.intBoundingRectY : currentChar.intBoundingRectY + currentChar.intBoundingRectHeight,
                            currentChar.intBoundingRectX : currentChar.intBoundingRectX + currentChar.intBoundingRectWidth]
+
+
+
+        # cv2.imshow(possiblePlate.imgGrayscale)
+        # cv2.waitKey(0)
+
+        # originalColorImage = Main.imgOriginalScene()
+        # colorImgROI = originalColorImage[currentChar.intBoundingRectY : currentChar.intBoundingRectY + currentChar.intBoundingRectHeight,
+        #                    currentChar.intBoundingRectX : currentChar.intBoundingRectX + currentChar.intBoundingRectWidth]
+        #
+        # cv2.imshow("colorImgROI", colorImgROI)
+        # cv2.waitKey(0)
+
+
 
         imgROIResized = cv2.resize(imgROI, (RESIZED_CHAR_IMAGE_WIDTH, RESIZED_CHAR_IMAGE_HEIGHT))           # resize image, this is necessary for char recognition
 

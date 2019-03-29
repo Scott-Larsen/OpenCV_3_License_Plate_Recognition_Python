@@ -101,6 +101,7 @@ def detectPlatesInScene(imgOriginalScene):
         print("\n")
         cv2.imshow("4a imgContours", imgContours)
 
+
         for i in range(0, len(listOfPossiblePlates)):
             p2fRectPoints = cv2.boxPoints(listOfPossiblePlates[i].rrLocationOfPlateInScene)
 
@@ -199,7 +200,10 @@ def extractPlate(imgOriginal, listOfMatchingChars):
             # calculate correction angle of plate region
     fltOpposite = listOfMatchingChars[len(listOfMatchingChars) - 1].intCenterY - listOfMatchingChars[0].intCenterY
     fltHypotenuse = DetectChars.distanceBetweenChars(listOfMatchingChars[0], listOfMatchingChars[len(listOfMatchingChars) - 1])
-    fltCorrectionAngleInRad = math.asin(fltOpposite / fltHypotenuse)
+    try:
+        fltCorrectionAngleInRad = math.asin(fltOpposite / fltHypotenuse)
+    except:
+        fltCorrectionAngleInRad = 0
     fltCorrectionAngleInDeg = fltCorrectionAngleInRad * (180.0 / math.pi)
 
             # pack plate region center point, width and height, and correction angle into rotated rect member variable of plate

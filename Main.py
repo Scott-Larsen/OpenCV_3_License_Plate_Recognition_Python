@@ -15,10 +15,8 @@ SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
-MAX_NUMBER_OF_DIGITS = 3
-
-showSteps = True
-scottDisplaySteps = True
+showSteps = False
+scottDisplaySteps = False
 
 def scottShowSteps(arg0, arg1):
     cv2.imshow(arg0, arg1)
@@ -37,7 +35,8 @@ def main():
     # imgOriginalScene  = cv2.imread("LicPlateImages/1.png")               # open image
     imgOriginalScene = cv2.imread("/Users/Scott/Desktop/DATA/SORT/CodingProgrammingPython/License_Plate_Recognition_Python/TestRaceImages/SRL_8136.jpg")               # open image
 
-
+    cv2.imshow("Original Image", imgOriginalScene)
+    cv2.waitKey(0)
 
     if imgOriginalScene is None:                            # if image was not read successfully
         print("\nerror: image not read from file \n\n")  # print error message to std out
@@ -54,10 +53,16 @@ def main():
     if len(listOfPossiblePlates) == 0:                          # if no plates were found
         print("\nno license plates were detected\n")  # inform user no plates were found
     else:                                                       # else
-                # if we get in here list of possible plates has at leat one plate
+                # if we get in here list of possible plates has at least one plate
 
                 # sort the list of possible plates in DESCENDING order (most number of chars to least number of chars)
         listOfPossiblePlates.sort(key = lambda possiblePlate: len(possiblePlate.strChars), reverse = True)
+
+
+
+        print(listOfPossiblePlates)
+
+
 
                 # suppose the plate with the most recognized chars (the first plate in sorted by string length descending order) is the actual plate
         licPlate = listOfPossiblePlates[0]
