@@ -15,7 +15,7 @@ SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
-showSteps = False
+showSteps = True
 scottDisplaySteps = False
 
 def scottShowSteps(arg0, arg1):
@@ -35,8 +35,8 @@ def main():
     # imgOriginalScene  = cv2.imread("LicPlateImages/1.png")               # open image
     imgOriginalScene = cv2.imread("/Users/Scott/Desktop/DATA/SORT/CodingProgrammingPython/License_Plate_Recognition_Python/TestRaceImages/SRL_8136.jpg")               # open image
 
-    cv2.imshow("Original Image", imgOriginalScene)
-    cv2.waitKey(0)
+    # cv2.imshow("Original Image", imgOriginalScene)
+    # cv2.waitKey(0)
 
     if imgOriginalScene is None:                            # if image was not read successfully
         print("\nerror: image not read from file \n\n")  # print error message to std out
@@ -60,7 +60,7 @@ def main():
 
 
 
-        print(listOfPossiblePlates)
+        # print(listOfPossiblePlates)
 
 
 

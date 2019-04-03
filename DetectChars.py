@@ -106,10 +106,10 @@ def detectCharsInPlates(listOfPossiblePlates):
 
         possiblePlate.imgGrayscale, possiblePlate.imgThresh = Preprocess.preprocess(possiblePlate.imgPlate)     # preprocess to get grayscale and threshold images
 
-        if Main.showSteps == True: # show steps ###################################################
-            cv2.imshow("5a possiblePlate.imgPlate", possiblePlate.imgPlate)
-            cv2.imshow("5b possiblePlate.imgGrayscale", possiblePlate.imgGrayscale)
-            cv2.imshow("5c possiblePlate.imgThresh", possiblePlate.imgThresh)
+        # if Main.showSteps == True: # show steps ###################################################
+        #     cv2.imshow("5a possiblePlate.imgPlate", possiblePlate.imgPlate)
+        #     cv2.imshow("5b possiblePlate.imgGrayscale", possiblePlate.imgGrayscale)
+        #     cv2.imshow("5c possiblePlate.imgThresh", possiblePlate.imgThresh)
         # end if # show steps #####################################################################
 
                 # increase size of plate image for easier viewing and char detection
@@ -118,8 +118,8 @@ def detectCharsInPlates(listOfPossiblePlates):
                 # threshold again to eliminate any gray areas
         thresholdValue, possiblePlate.imgThresh = cv2.threshold(possiblePlate.imgThresh, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-        if Main.showSteps == True: # show steps ###################################################
-            cv2.imshow("5d possiblePlate.imgThresh", possiblePlate.imgThresh)
+        # if Main.showSteps == True: # show steps ###################################################
+        #     cv2.imshow("5d possiblePlate.imgThresh", possiblePlate.imgThresh)
         # end if # show steps #####################################################################
 
                 # find all possible chars in the plate,
@@ -149,8 +149,8 @@ def detectCharsInPlates(listOfPossiblePlates):
 
             # print("About to imshow imgContours")
             # cv2.waitKey(0)
-            cv2.imshow("6 imgContours", imgContours)
-            cv2.waitKey(0)
+            # cv2.imshow("6 imgContours", imgContours)
+            # cv2.waitKey(0)
         # end if # show steps #####################################################################
 
                 # given a list of all possible chars, find groups of matching chars within the plate
@@ -339,21 +339,41 @@ def findListOfListsOfMatchingChars(listOfPossibleChars):
     def listLength(elem):
         return len(elem)
 
+    #Sorts the list by the number of matching chars in descending order
     listOfListsOfMatchingChars = sorted(listOfListsOfMatchingChars, key=listLength, reverse=True)
-
-    # print(listOfListsOfMatchingChars)
 
     positionOfBestLengthList = False
 
+    #Goes through lists to find the longest list of matching chars within the max number of digits (longest race number)
     for i in range(len(listOfListsOfMatchingChars)):
         if len(listOfListsOfMatchingChars[i]) <= MAX_NUMBER_OF_DIGITS and positionOfBestLengthList == False:
             positionOfBestLengthList = i
             break
 
-    # print(positionOfBestLengthList)
+    print(positionOfBestLengthList)
 
-    listOfListsOfMatchingChars = listOfListsOfMatchingChars[positionOfBestLengthList:] +\
-                                 listOfListsOfMatchingChars[:positionOfBestLengthList]
+    #Re-orders the list by maximum quantity of chars <= max bib length descending to one and then ascending above the
+    #max number of chars (a stray character added, etc.)
+    newHeadOfList = listOfListsOfMatchingChars[positionOfBestLengthList - 1:]
+    newEndOfListBackwards = listOfListsOfMatchingChars[:positionOfBestLengthList - 1]
+
+    listOfListsOfMatchingChars = newHeadOfList + newEndOfListBackwards[::-1]
+
+    print(listOfListsOfMatchingChars)
+
+    #Limit the list of Lists of Matching Chars to....
+    if len(listOfListsOfMatchingChars) > 5:
+        listOfListsOfMatchingChars = listOfListsOfMatchingChars[0:5]
+
+    # listOfListsOfMatchingChars = listOfListsOfMatchingChars[positionOfBestLengthList:] + \
+    #                              listOfListsOfMatchingChars[positionOfBestLengthList - 1::-1]
+    # print(listOfListsOfMatchingChars)
+
+    # overMax = listOfListsOfMatchingChars[:positionOfBestLengthList:-1]
+    # # print(type(overMax))
+    # # print(type(overMax.reverse()))
+    # listOfListsOfMatchingChars = listOfListsOfMatchingChars[positionOfBestLengthList:] +\
+    #                              overMax
 
     if listOfListsOfMatchingChars == False:
         listOfListsOfMatchingChars = []
@@ -363,78 +383,6 @@ def findListOfListsOfMatchingChars(listOfPossibleChars):
     return listOfListsOfMatchingChars
 # end function
 
-# ###################################################################################################
-# def findListOfListsOfMatchingChars(listOfPossibleChars):
-#             # with this function, we start off with all the possible chars in one big list
-#             # the purpose of this function is to re-arrange the one big list of chars into a list of lists of matching chars,
-#             # note that chars that are not found to be in a group of matches do not need to be considered further
-#     listOfListsOfMatchingChars = []                  # this will be the return value
-#
-#     # print("\nI'm in the findListOfListsOfMatchingChars function")
-#     # print(f"\nlistOfPossibleChars = {listOfPossibleChars}")
-#
-#     for possibleChar in listOfPossibleChars:
-#
-#         # print(f"\nPossible char = {possibleChar}")
-#         # for each possible char in the one big list of chars
-#         listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
-#
-#         listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
-#
-#         # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
-#         #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
-#         if len(listOfMatchingChars) <= MAX_NUMBER_OF_DIGITS:     # if current possible list of matching chars is not long enough to constitute a possible plate
-#             # continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
-#                                                 # to save the list in any way since it did not have enough chars to be a possible plate
-#
-#
-#                                                 # if we get here, the current list passed test as a "group" or "cluster" of matching chars
-#             listOfListsOfMatchingChars.append(listOfMatchingChars)      # so add to our list of lists of matching chars
-#         # end if
-#
-#
-#
-#
-#         # # print(f"\nPossible char = {possibleChar}")
-#         # # for each possible char in the one big list of chars
-#         # listOfMatchingChars = findListOfMatchingChars(possibleChar, listOfPossibleChars)        # find all chars in the big list that match the current char
-#         #
-#         # listOfMatchingChars.append(possibleChar)                # also add the current char to current possible list of matching chars
-#         #
-#         # # if len(listOfMatchingChars) > Main.MAX_NUMBER_OF_DIGITS:
-#         # #     print(f"listOfMatchingChars {listOfListsOfMatchingChars} is too long")
-#         # if len(listOfMatchingChars) < MIN_NUMBER_OF_MATCHING_CHARS:     # if current possible list of matching chars is not long enough to constitute a possible plate
-#         #     continue                            # jump back to the top of the for loop and try again with next char, note that it's not necessary
-#         #                                         # to save the list in any way since it did not have enough chars to be a possible plate
-#         # # end if
-#         #
-#         #                                         # if we get here, the current list passed test as a "group" or "cluster" of matching chars
-#         # listOfListsOfMatchingChars.append(listOfMatchingChars)      # so add to our list of lists of matching chars
-#
-#
-#
-#
-#
-#         listOfPossibleCharsWithCurrentMatchesRemoved = []
-#
-#                                                 # remove the current list of matching chars from the big list so we don't use those same chars twice,
-#                                                 # make sure to make a new big list for this since we don't want to change the original big list
-#         listOfPossibleCharsWithCurrentMatchesRemoved = list(set(listOfPossibleChars) - set(listOfMatchingChars))
-#
-#         recursiveListOfListsOfMatchingChars = findListOfListsOfMatchingChars(listOfPossibleCharsWithCurrentMatchesRemoved)      # recursive call
-#
-#         for recursiveListOfMatchingChars in recursiveListOfListsOfMatchingChars:        # for each list of matching chars found by recursive call
-#             listOfListsOfMatchingChars.append(recursiveListOfMatchingChars)             # add to our original list of lists of matching chars
-#         # end for
-#
-#         break       # exit for
-#
-#     # end for
-#
-#
-#
-#     return listOfListsOfMatchingChars
-# # end function
 
 ###################################################################################################
 def findListOfMatchingChars(possibleChar, listOfChars):
@@ -597,10 +545,10 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
 
     # end for
 
-    if Main.showSteps == True: # show steps #######################################################
-        print("About to imshow 10 imgThreshColor")
-        cv2.waitKey(0)
-        cv2.imshow("10 imgThreshColor", imgThreshColor)
+    # if Main.showSteps == True: # show steps #######################################################
+    #     print("About to imshow 10 imgThreshColor")
+    #     cv2.waitKey(0)
+    #     cv2.imshow("10 imgThreshColor", imgThreshColor)
     # end if # show steps #########################################################################
 
     return strChars

@@ -97,29 +97,29 @@ def detectPlatesInScene(imgOriginalScene):
 
     print("\n" + str(len(listOfPossiblePlates)) + " possible plates found")  # 13 with MCLRNF1 image
 
-    if Main.showSteps == True: # show steps #######################################################
-        print("\n")
-        cv2.imshow("4a imgContours", imgContours)
+    # if Main.showSteps == True: # show steps #######################################################
+    #     print("\n")
+    #     # cv2.imshow("4a imgContours", imgContours)
+    #
+    #
+    #     for i in range(0, len(listOfPossiblePlates)):
+    #         p2fRectPoints = cv2.boxPoints(listOfPossiblePlates[i].rrLocationOfPlateInScene)
+    #
+    #         cv2.line(imgContours, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), Main.SCALAR_RED, 2)
+    #         cv2.line(imgContours, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), Main.SCALAR_RED, 2)
+    #         cv2.line(imgContours, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), Main.SCALAR_RED, 2)
+    #         cv2.line(imgContours, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), Main.SCALAR_RED, 2)
+    #
+    #         # cv2.imshow("4a", imgContours)
+    #
+    #         # print("possible plate " + str(i) + ", click on any image and press a key to continue . . .")
+    #         #
+    #         # cv2.imshow("4b listOfPossiblePlates[i].imgPlate", listOfPossiblePlates[i].imgPlate)
+    #         cv2.waitKey(0)
+    #     # end for
 
-
-        for i in range(0, len(listOfPossiblePlates)):
-            p2fRectPoints = cv2.boxPoints(listOfPossiblePlates[i].rrLocationOfPlateInScene)
-
-            cv2.line(imgContours, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), Main.SCALAR_RED, 2)
-
-            cv2.imshow("4a", imgContours)
-
-            print("possible plate " + str(i) + ", click on any image and press a key to continue . . .")
-
-            cv2.imshow("4b listOfPossiblePlates[i].imgPlate", listOfPossiblePlates[i].imgPlate)
-            cv2.waitKey(0)
-        # end for
-
-        print("\nplate detection complete, click on any image and press a key to begin char recognition . . .\n")
-        cv2.waitKey(0)
+        # print("\nplate detection complete, click on any image and press a key to begin char recognition . . .\n")
+        # cv2.waitKey(0)
     # end if # show steps #########################################################################
 
     return listOfPossiblePlates

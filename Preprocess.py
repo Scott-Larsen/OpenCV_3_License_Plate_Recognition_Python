@@ -30,15 +30,15 @@ def preprocess(imgOriginal):
     imgThresh = cv2.adaptiveThreshold(erosion, 255.0, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV,
                                       ADAPTIVE_THRESH_BLOCK_SIZE, ADAPTIVE_THRESH_WEIGHT)
 
-    cv2.imshow("Image Blurred", imgBlurred)
-    cv2.imshow("Binary threshold", threshold)
-    cv2.imshow("Dilation", dilation)
-    cv2.imshow("Erosion", erosion)
+    # cv2.imshow("Image Blurred", imgBlurred)
+    # cv2.imshow("Binary threshold", threshold)
+    # cv2.imshow("Dilation", dilation)
+    # cv2.imshow("Erosion", erosion)
+    #
+    # cv2.imshow("mean_c", mean_c)
+    # cv2.imshow("imgThresh", imgThresh)
 
-    cv2.imshow("mean_c", mean_c)
-    cv2.imshow("imgThresh", imgThresh)
-
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
     return imgGrayscale, imgThresh
 ###################################################################################################
